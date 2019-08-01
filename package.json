@@ -1,0 +1,13 @@
+{
+  "name": "hypercanvas",
+  "version": "0.0.1",
+  "description": "canvas + jsx + hooks",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "start": "tsc -w"
+  },
+  "author": "John van de Water",
+  "license": "MIT"
+}
