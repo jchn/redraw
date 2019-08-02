@@ -41,8 +41,6 @@ function update (newVNode, oldVNode) {
   const newProps = newVNode.props
   let tmp
 
-  newVNode._dimensions = { width: newProps.width, height: newProps.height }
-
   if (typeof newType === 'function') {
     let c
 
@@ -63,6 +61,7 @@ function update (newVNode, oldVNode) {
 
     const offset = getLastKnownPosition(newVNode)
     newVNode._position = { x: newProps.x + offset.x, y: newProps.y + offset.y }
+    newVNode._dimensions = { width: newProps.width, height: newProps.height }
 
     nodes.push(newVNode)
     updateEvents(newVNode.props)
