@@ -19,18 +19,28 @@ Component.prototype.redraw = function (all) {
 
 function doRender (props) {
   // @ts-ignore
-  this.constructor(props)
+  return this.constructor(props)
 }
 
 function update (newVNode, oldVNode) {
   const newType = newVNode.type
   const newProps = newVNode.props
+  const newParent = newVNode._parent
   let tmp
 
-  newVNode._position = { x: newProps.x, y: newProps.y }
   newVNode._dimensions = { width: newProps.width, height: newProps.height }
 
-  if (newType === 'function') {
+  if (newParent) {
+    if (typeof newParent.type === 'function') {
+      newVNode._position = Object.assign({}, newParent._position)
+    } else {
+      newVNode._position = { x: newProps.x + newParent._position.x, y: newProps.y + newParent._position.y }
+    }
+  } else {
+    newVNode._position = { x: newProps.x, y: newProps.y }
+  }
+
+  if (typeof newType === 'function') {
     let c
 
     if (oldVNode._component) {
@@ -43,33 +53,35 @@ function update (newVNode, oldVNode) {
 
     tmp = c.render(newProps)
 
-    newVNode._children = tmp // probably have to do some sanitizing on this value
-    
+    newVNode._children = toChildArray(tmp) // probably have to do some sanitizing on this value
+
   } else {
     nodes.push(newVNode)
     updateEvents(newVNode.props)
+    newVNode._children = toChildArray(newVNode.props.children)
   }
   updateChildren(newVNode, oldVNode)
+
+  return newVNode
 }
 
 function updateChildren (newParentVNode, oldParentVNode) {
   let newChild, oldChild
   let newChildren = newParentVNode._children
-  let oldChildren = oldParentVNode._children
+  let oldChildren = oldParentVNode ? oldParentVNode._children : null
 
   if (!newChildren) return
 
-  for (let i; i < newChildren.length; i++) {
+  for (let i = 0; i < newChildren.length; i++) {
     if (newChild === null) continue
 
     newChild = newChildren[i]
     newChild._parent = newParentVNode
     newChild._depth = newParentVNode._depth + 1
 
-    oldChild = oldChildren[i]
+    // oldChild = oldChildren[i]
 
-    if (!oldChild) continue
-
+    // if (!oldChild) continue
     update(newChild, oldChild)
   }
 }
@@ -109,3 +121,15 @@ function fireEvent (eventName, { x, y }, originalEvent) {
     }
   }
 }
+
+function toChildArray (vnode: {}|[]) {
+  if (!vnode) return []
+
+  if (!Array.isArray(vnode)) {
+    return [vnode]
+  } else {
+    return vnode.flatMap(c => c)
+  }
+}
+
+export default update

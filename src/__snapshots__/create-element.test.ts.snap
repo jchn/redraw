@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`createElement should return a vnode 1`] = `
+Object {
+  "_children": null,
+  "_component": null,
+  "_depth": 0,
+  "_dimensions": null,
+  "_parent": null,
+  "_position": null,
+  "props": Object {
+    "children": Array [],
+    "foo": "bar",
+  },
+  "type": "rectangle",
+}
+`;

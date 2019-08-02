@@ -1,8 +1,8 @@
 function createElement (type, props, ...children) {
-  return {
+  return createVNode({
     type,
     props: Object.assign(props, { children })
-  }
+  })
 }
 
 function createVNode ({ type, props }) {
@@ -17,3 +17,5 @@ function createVNode ({ type, props }) {
     _depth: 0
   }
 }
+
+export default createElement
