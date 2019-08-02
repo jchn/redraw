@@ -1,4 +1,6 @@
 import { onEventToEventName, overlap } from "./utils";
+import { renderComponent } from './hooks'
+import draw from './draw'
 
 let nodes: any[] = []
 let listeners = {}
@@ -9,11 +11,11 @@ function Component (props) {
   this.props = props
 }
 
-Component.prototype.redraw = function (all) {
+Component.prototype.update = function (all) {
   if (all) {
-    console.log('redraw entrire canvas for', this)
+    console.log('update entrire canvas for', this)
   } else {
-    console.log('redraw', this)
+    console.log('update', this)
   }
 }
 
@@ -51,6 +53,7 @@ function update (newVNode, oldVNode) {
       c.render = doRender
     }
 
+    renderComponent(c)
     tmp = c.render(newProps)
 
     newVNode._children = toChildArray(tmp) // probably have to do some sanitizing on this value
@@ -79,9 +82,6 @@ function updateChildren (newParentVNode, oldParentVNode) {
     newChild._parent = newParentVNode
     newChild._depth = newParentVNode._depth + 1
 
-    // oldChild = oldChildren[i]
-
-    // if (!oldChild) continue
     update(newChild, oldChild)
   }
 }
@@ -133,3 +133,12 @@ function toChildArray (vnode: {}|[]) {
 }
 
 export default update
+
+let currentVNode
+
+export function render (canvasCtx, vnode) {
+  ctx = canvasCtx
+  nodes = []
+  currentVNode = update(vnode, currentVNode || {})
+  draw(ctx, currentVNode)
+}

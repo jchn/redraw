@@ -138,9 +138,9 @@ describe('render props', () => {
 
 describe('component instances', () => {
   const vnode = <Rectangle x={10} y={10} width={10} height={10} />
-  it('should have a redraw method', () => {
+  it('should have a update method', () => {
     update(vnode, {})
 
-    expect(vnode._component).toHaveProperty('redraw')
+    expect(vnode._component).toHaveProperty('update')
   })
 })

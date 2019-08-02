@@ -2,7 +2,7 @@
   "name": "hypercanvas",
   "version": "0.0.1",
   "description": "canvas + jsx + hooks",
-  "main": "index.js",
+  "main": "build/index.js",
   "scripts": {
     "test": "jest",
     "build": "tsc",
