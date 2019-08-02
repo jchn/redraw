@@ -1,4 +1,4 @@
-import { onEventToEventName, overlap } from "./utils";
+import { onEventToEventName, eventNameToOnEventName, overlap } from "./utils";
 import { renderComponent } from './hooks'
 import draw from './draw'
 
@@ -93,7 +93,6 @@ function updateEvents (props) {
   if (!props) return
   Object.keys(props).filter(key => key[0] + key[1] === 'on').forEach(eventKey => {
     eventName = onEventToEventName(eventKey)
-
     if (eventName in ctx.canvas && !(eventName in listeners)) {
       createListenerForEvent(eventName)
     }
@@ -111,11 +110,12 @@ function createListenerForEvent(eventName) {
 
 function fireEvent (eventName, { x, y }, originalEvent) {
   let n
+  const onEventName = eventNameToOnEventName(eventName)
   for (let i = 0; i < nodes.length; i++) {
     n = nodes[i]
     if (n._dimensions && n._position && overlap({x, y}, { ...n._position, ...n._dimensions })) {
-      if (eventName in n.props) {
-        n.props[eventName](originalEvent)
+      if (onEventName in n.props) {
+        n.props[onEventName](originalEvent)
         break
       }
     }
@@ -143,4 +143,5 @@ export function render (canvasCtx, vnode) {
   nodes = []
   currentVNode = update(vnode, currentVNode || {})
   draw(ctx, currentVNode)
+  nodes.reverse()
 }

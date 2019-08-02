@@ -6,12 +6,28 @@ const eventNames = {
   onDoubleClick: 'doubleClick'
 }
 
+const onEventNames = (() => {
+  let names = {}
+  for (let key in eventNames) {
+    names[eventNames[key]] = key
+  }
+  return names
+})()
+
 export function onEventToEventName (onEventName) {
   const eventName = eventNames[onEventName]
 
   if (eventName) return eventName 
 
   console.warn('no event name found for', onEventName)
+}
+
+export function eventNameToOnEventName (eventName) {
+  const onEventName = onEventNames[eventName]
+
+  if (onEventName) return onEventName
+
+  console.warn('no on event name found for', eventName)
 }
 
 export function overlap (point, rectangle) {
