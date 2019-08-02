@@ -1,7 +1,8 @@
-import { rectangle } from './elements'
+import { rectangle, text } from './elements'
 
 const elementTypes = {
-  rectangle
+  rectangle,
+  text
 }
 
 function draw (ctx, vnode) {
@@ -13,6 +14,8 @@ function draw (ctx, vnode) {
       elementTypes[type].draw(ctx, Object.assign({}, props, _position, _dimensions, { children: _children }))
     }
   }
+
+  if (!_children) return
 
   for (let i = 0; i < _children.length; i++) {
     draw(ctx, _children[i])

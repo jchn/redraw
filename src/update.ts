@@ -58,7 +58,6 @@ function update (newVNode, oldVNode) {
     newVNode._children = toChildArray(tmp) // probably have to do some sanitizing on this value
 
   } else {
-
     const offset = getLastKnownPosition(newVNode)
     newVNode._position = { x: newProps.x + offset.x, y: newProps.y + offset.y }
     newVNode._dimensions = { width: newProps.width, height: newProps.height }
@@ -79,10 +78,15 @@ function updateChildren (newParentVNode, oldParentVNode) {
 
   if (!newChildren) return
 
-  for (let i = 0; i < newChildren.length; i++) {
-    if (newChild === null) continue
+  console.log('newChildren', newChildren)
 
+  for (let i = 0; i < newChildren.length; i++) {
     newChild = newChildren[i]
+
+    if (newChild === null || typeof newChild === 'string') continue
+
+    console.log(newChild, typeof newChild)
+
     newChild._parent = newParentVNode
     newChild._depth = newParentVNode._depth + 1
 
