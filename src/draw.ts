@@ -10,12 +10,12 @@ function draw (ctx, vnode) {
 
   if (typeof type === 'string') {
     if (type in elementTypes) {
-      elementTypes[type].draw(ctx, Object.assign({}, props, _position, _dimensions))
+      elementTypes[type].draw(ctx, Object.assign({}, props, _position, _dimensions, { children: _children }))
     }
   }
 
   for (let i = 0; i < _children.length; i++) {
-    draw(ctx, vnode)
+    draw(ctx, _children[i])
   }
 }
 

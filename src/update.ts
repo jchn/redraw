@@ -122,13 +122,15 @@ function fireEvent (eventName, { x, y }, originalEvent) {
   }
 }
 
+const flatten = arr => Array.isArray(arr) ? arr.reduce((a, b) => a.concat(b), []) : arr
+
 function toChildArray (vnode: {}|[]) {
   if (!vnode) return []
 
   if (!Array.isArray(vnode)) {
     return [vnode]
   } else {
-    return vnode.flatMap(c => c)
+    return flatten(vnode)
   }
 }
 
