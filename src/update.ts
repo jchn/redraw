@@ -12,11 +12,13 @@ function Component (props) {
 }
 
 Component.prototype.update = function (all) {
-  if (all) {
-    console.log('update entrire canvas for', this)
-  } else {
-    console.log('update', this)
-  }
+
+  window.requestAnimationFrame(() => render(ctx, currentVNode))
+  // if (all) {
+  //   console.log('update entrire canvas for', this)
+  // } else {
+  //   console.log('update', this)
+  // }
 }
 
 function doRender (props) {
@@ -24,28 +26,27 @@ function doRender (props) {
   return this.constructor(props)
 }
 
+function getLastKnownPosition (vnode) {
+  if (vnode._parent && vnode._parent._position) {
+    return vnode._parent._position
+  } else if (vnode._parent) {
+    return getLastKnownPosition(vnode._parent)
+  } else {
+    return { x: 0, y: 0 }
+  }
+}
+
 function update (newVNode, oldVNode) {
   const newType = newVNode.type
   const newProps = newVNode.props
-  const newParent = newVNode._parent
   let tmp
 
   newVNode._dimensions = { width: newProps.width, height: newProps.height }
 
-  if (newParent) {
-    if (typeof newParent.type === 'function') {
-      newVNode._position = Object.assign({}, newParent._position)
-    } else {
-      newVNode._position = { x: newProps.x + newParent._position.x, y: newProps.y + newParent._position.y }
-    }
-  } else {
-    newVNode._position = { x: newProps.x, y: newProps.y }
-  }
-
   if (typeof newType === 'function') {
     let c
 
-    if (oldVNode._component) {
+    if (oldVNode && oldVNode._component) {
       c = newVNode._component = oldVNode._component
     } else {
       newVNode._component  = c = new Component(newProps)
@@ -59,6 +60,10 @@ function update (newVNode, oldVNode) {
     newVNode._children = toChildArray(tmp) // probably have to do some sanitizing on this value
 
   } else {
+
+    const offset = getLastKnownPosition(newVNode)
+    newVNode._position = { x: newProps.x + offset.x, y: newProps.y + offset.y }
+
     nodes.push(newVNode)
     updateEvents(newVNode.props)
     newVNode._children = toChildArray(newVNode.props.children)
@@ -71,7 +76,7 @@ function update (newVNode, oldVNode) {
 function updateChildren (newParentVNode, oldParentVNode) {
   let newChild, oldChild
   let newChildren = newParentVNode._children
-  let oldChildren = oldParentVNode ? oldParentVNode._children : null
+  let oldChildren = oldParentVNode && oldParentVNode._children ? oldParentVNode._children : []
 
   if (!newChildren) return
 
@@ -81,6 +86,8 @@ function updateChildren (newParentVNode, oldParentVNode) {
     newChild = newChildren[i]
     newChild._parent = newParentVNode
     newChild._depth = newParentVNode._depth + 1
+
+    oldChild = oldChildren[i]
 
     update(newChild, oldChild)
   }
