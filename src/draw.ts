@@ -6,8 +6,9 @@ const elementTypes = {
   image
 }
 
-function draw (ctx, vnode) {
+function draw (ctx, vnode, clear = true) {
   if (!vnode) return
+  if (clear) ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
   const { type, props, _children, _position, _dimensions } = vnode
 
   if (typeof type === 'string') {
@@ -19,7 +20,7 @@ function draw (ctx, vnode) {
   if (!_children) return
 
   for (let i = 0; i < _children.length; i++) {
-    draw(ctx, _children[i])
+    draw(ctx, _children[i], false)
   }
 }
 
