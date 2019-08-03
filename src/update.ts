@@ -132,7 +132,26 @@ function fireEvent (eventName, { x, y }, originalEvent) {
   }
 }
 
-const flatten = arr => Array.isArray(arr) ? arr.reduce((a, b) => a.concat(b), []) : arr
+const flatten = arr => {
+  if (!Array.isArray(arr)) return arr
+
+  let curr, output:any[] = []
+  for (let i = 0; i < arr.length; i++) {
+    curr = arr[i]
+
+    if (Array.isArray(curr)) {
+      curr.forEach(el => output.push(el))
+    } else {
+      output.push(curr)
+    }
+  }
+
+  if (output.some(el => Array.isArray(el))) {
+    return flatten(output)
+  } else {
+    return output
+  }
+}
 
 function toChildArray (vnode: {}|[]) {
   if (!vnode) return []
