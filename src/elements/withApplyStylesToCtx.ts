@@ -23,13 +23,10 @@ export interface StyleObject {
 const withApplyStylesToCtx = drawFn => (ctx: CanvasRenderingContext2D, props) => {
   if (!props.style) return drawFn(ctx, props)
 
-  ctx.save()
   for (let key in props.style) {
     ctx[key] = props.style[key]
   }
   drawFn(ctx, props)
-  ctx.restore()
-  props.clip && ctx.clip()
 }
 
 export default withApplyStylesToCtx

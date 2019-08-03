@@ -1,3 +1,5 @@
+import withApplyStylesToCtx from "./withApplyStylesToCtx";
+
 interface props {
   x: number 
   y: number 
@@ -6,7 +8,7 @@ interface props {
   children: string[]
 }
 
-export const draw = (ctx: CanvasRenderingContext2D, { x, y, width, fontSize, children }: props) => {
+const drawText = (ctx: CanvasRenderingContext2D, { x, y, width, fontSize, children }: props) => {
   ctx.font = `${fontSize}px sans-serif`
   const lines = children[0].split(' ').reduce((lines: string[][], word) => {
     const lastLine = lines[lines.length - 1]
@@ -25,3 +27,5 @@ export const draw = (ctx: CanvasRenderingContext2D, { x, y, width, fontSize, chi
     ctx.fillText(line.join(' '), x, y + (fontSize * i) + fontSize)
   })
 }
+
+export const draw = withApplyStylesToCtx(drawText)
