@@ -103,7 +103,7 @@ function updateEvents (props) {
   if (!props) return
   Object.keys(props).filter(key => key[0] + key[1] === 'on').forEach(eventKey => {
     eventName = onEventToEventName(eventKey)
-    if (eventName in ctx.canvas && !(eventName in listeners)) {
+    if (eventKey.toLowerCase() in ctx.canvas && !(eventName in listeners)) {
       createListenerForEvent(eventName)
     }
   })
