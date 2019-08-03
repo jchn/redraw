@@ -4,7 +4,10 @@ const eventNames = {
   onMouseDown: 'mousedown',
   onMouseMove: 'mousemove',
   onDoubleClick: 'doubleClick',
-  onWheel: 'wheel'
+  onWheel: 'wheel',
+  onTouchStart: 'touchstart',
+  onTouchEnd: 'touchend',
+  onTouchMove: 'touchmove'
 }
 
 const onEventNames = (() => {

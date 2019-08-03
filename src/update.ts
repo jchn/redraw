@@ -108,10 +108,30 @@ function updateEvents (props) {
   })
 }
 
+let canvasClientRect
+
+function getPositionFromEvent (event) {
+  if (event instanceof MouseEvent) {
+    return { x: event.offsetX, y: event.offsetY }
+  }
+
+  if (event instanceof TouchEvent) {
+    var x = event.changedTouches[0].pageX - canvasClientRect.left;
+    var y = event.changedTouches[0].pageY - canvasClientRect.top;
+
+    return { x, y }
+  }
+
+  console.warn('event', event, 'not yet supported')
+
+  return { x: undefined, y: undefined }
+}
+
 function createListenerForEvent(eventName) { 
   const listener = e => {
-    const { offsetX, offsetY } = e
-    fireEvent(eventName, { x: offsetX, y: offsetY }, e)
+    const position = getPositionFromEvent(e)
+
+    fireEvent(eventName, position, e)
   }
   listeners[eventName] = listener
   ctx.canvas.addEventListener(eventName, listener)
@@ -168,6 +188,7 @@ let currentVNode
 
 export function render (canvasCtx, vnode) {
   ctx = canvasCtx
+  if (!canvasClientRect) canvasClientRect = ctx.canvas.getBoundingClientRect()
   nodes = []
   currentVNode = update(vnode, currentVNode || {})
   draw(ctx, currentVNode)
