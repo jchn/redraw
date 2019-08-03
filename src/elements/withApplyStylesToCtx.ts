@@ -29,6 +29,7 @@ const withApplyStylesToCtx = drawFn => (ctx: CanvasRenderingContext2D, props) =>
   }
   drawFn(ctx, props)
   ctx.restore()
+  props.clip && ctx.clip()
 }
 
 export default withApplyStylesToCtx
