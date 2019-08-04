@@ -1,4 +1,4 @@
-// Largely inspired by: https://github.com/preactjs/preact/blob/master/hooks/src/index.js
+// Largely copied from: https://github.com/preactjs/preact/blob/master/hooks/src/index.js
 
 let currentIndex = 0
 let currentComponent

@@ -1,8 +1,12 @@
 {
-  "name": "hypercanvas",
+  "name": "@jchn/redraw",
   "version": "0.0.1",
   "description": "canvas + jsx + hooks",
   "main": "build/index.js",
+  "files": [
+    "build/*",
+    "!build/**/*.test.js"
+  ],
   "scripts": {
     "test": "jest",
     "build": "tsc",
