@@ -1,24 +1,27 @@
 {
   "name": "@jchn/redraw",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "canvas + jsx + hooks",
-  "main": "build/index.js",
   "files": [
     "build/*",
     "!build/**/*.test.js"
   ],
+  "source": "src/index.ts",
+  "main": "build/index.js",
+  "module": "build/index.mjs",
+  "unpkg": "build/index.umd.js",
   "scripts": {
-    "test": "jest",
-    "build": "tsc",
-    "start": "tsc -w"
+    "build": "microbundle",
+    "dev": "microbundle watch"
   },
   "author": "John van de Water",
   "license": "MIT",
   "devDependencies": {
     "@types/jest": "^24.0.16",
+    "core-js": "^3.1.4",
     "jest": "^24.8.0",
+    "microbundle": "^0.11.0",
     "ts-jest": "^24.0.2",
-    "typescript": "^3.5.3",
-    "core-js": "^3.1.4"
+    "typescript": "^3.5.3"
   }
 }
