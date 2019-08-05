@@ -6,10 +6,11 @@ interface props {
   width: number 
   fontSize: number
   fontFamily?: string
+  lineHeight?: number
   children: string[]
 }
 
-const drawText = (ctx: CanvasRenderingContext2D, { x, y, width, fontSize, fontFamily, children }: props) => {
+const drawText = (ctx: CanvasRenderingContext2D, { x, y, width, fontSize, fontFamily, lineHeight = 1, children }: props) => {
   ctx.font = `${fontSize}px ${fontFamily || 'sans-serif'}`
   const lines = children[0].split(' ').reduce((lines: string[][], word) => {
     const lastLine = lines[lines.length - 1]
@@ -25,7 +26,7 @@ const drawText = (ctx: CanvasRenderingContext2D, { x, y, width, fontSize, fontFa
   }, [[]])
 
   lines.forEach((line, i) => {
-    ctx.fillText(line.join(' '), x, y + (fontSize * i) + fontSize)
+    ctx.fillText(line.join(' '), x, (y + (fontSize * i * lineHeight) + fontSize))
   })
 }
 
