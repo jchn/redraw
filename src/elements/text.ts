@@ -5,11 +5,12 @@ interface props {
   y: number 
   width: number 
   fontSize: number
+  fontFamily?: string
   children: string[]
 }
 
-const drawText = (ctx: CanvasRenderingContext2D, { x, y, width, fontSize, children }: props) => {
-  ctx.font = `${fontSize}px sans-serif`
+const drawText = (ctx: CanvasRenderingContext2D, { x, y, width, fontSize, fontFamily, children }: props) => {
+  ctx.font = `${fontSize}px ${fontFamily || 'sans-serif'}`
   const lines = children[0].split(' ').reduce((lines: string[][], word) => {
     const lastLine = lines[lines.length - 1]
     const size = ctx.measureText(lastLine.concat([word]).join(' '))
