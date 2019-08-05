@@ -10,7 +10,7 @@ interface props {
 }
 
 const drawImage = (ctx: CanvasRenderingContext2D, { x, y, width, height, src }: props) => {
-  ctx.drawImage(src, x, y + y, width, height)
+  ctx.drawImage(src, x, y, width, height)
 }
 
 export const draw = withApplyStylesToCtx(drawImage)
