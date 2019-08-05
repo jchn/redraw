@@ -1,9 +1,10 @@
-import { rectangle, text, image } from './elements'
+import { rectangle, text, image, circle } from './elements'
 
 const elementTypes = {
   rectangle,
   text,
-  image
+  image,
+  circle
 }
 
 function draw (ctx, vnode, clear = true) {

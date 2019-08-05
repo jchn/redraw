@@ -1,6 +1,6 @@
 {
   "name": "@jchn/redraw",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "canvas + jsx + hooks",
   "files": [
     "build/*",
