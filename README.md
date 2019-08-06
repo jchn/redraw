@@ -37,7 +37,7 @@ const view = (
 const ctx = document.querySelector('canvas').getContext('2d')
 
 // mount the application by passing the view and the context to Redraw's render function
-redraw(ctx, view)
+render(ctx, view)
 ```
 
 ## Components
