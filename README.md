@@ -2,10 +2,13 @@
 
 Canvas + JSX + Hooks
 
-**⚠️ Please note that this still is a work in progress ️️️⚠️**
+<p align="center">
+  <img width="543" height="463" alt="redraw demo" src="/media/redraw-example.gif" />
+</p>
 
-![example](/media/redraw-example.gif)
 [View on CodePen](https://codepen.io/JohnvandeWater/pen/5de1299cbacff72b850183f220636487)
+
+**⚠️ Please note that this still is a work in progress ️️️⚠️**
 
 ## Getting started
 
