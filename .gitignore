@@ -1,3 +1,4 @@
 node_modules
 build
 .rts2*
+.DS_Store
