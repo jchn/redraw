@@ -4,6 +4,9 @@ Canvas + JSX + Hooks
 
 **⚠️ Please note that this still is a work in progress ️️️⚠️**
 
+![example](/media/redraw-example.gif)
+[View on CodePen](https://codepen.io/JohnvandeWater/pen/5de1299cbacff72b850183f220636487)
+
 ## Getting started
 
 Install Redraw:
