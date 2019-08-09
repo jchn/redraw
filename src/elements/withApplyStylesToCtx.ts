@@ -1,6 +1,6 @@
 export interface StyleObject {
   lineWidth?: number
-  lineCap?: 'butt'|'round'|'square'
+  lineCap?: 'butt' | 'round' | 'square'
   lineDashOffset?: number[]
   fillStyle?: string
   strokeStyle?: string
@@ -9,18 +9,27 @@ export interface StyleObject {
   shadowOffsetX?: number
   shadowOffsetY?: number
   opacity?: number
-  textAlign?: 'left'|'right'|'center'|'start'|'end'
-  textBaseline?: 'top'|'hanging'|'middle'|'alphabetic'|'ideographic'|'bottom'
+  textAlign?: 'left' | 'right' | 'center' | 'start' | 'end'
+  textBaseline?:
+    | 'top'
+    | 'hanging'
+    | 'middle'
+    | 'alphabetic'
+    | 'ideographic'
+    | 'bottom'
   font?: string
   globalAlpha?: number
-  lineJoin?: 'bevel'|'round'|'miter'
+  lineJoin?: 'bevel' | 'round' | 'miter'
   miterLimit?: number
   filter?: string
   imageSmoothingEnabled?: boolean
   currentTransform?: any
 }
 
-const withApplyStylesToCtx = drawFn => (ctx: CanvasRenderingContext2D, props) => {
+const withApplyStylesToCtx = drawFn => (
+  ctx: CanvasRenderingContext2D,
+  props
+) => {
   if (!props.style) return drawFn(ctx, props)
 
   for (let key in props.style) {

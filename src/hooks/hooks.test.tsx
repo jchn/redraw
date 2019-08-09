@@ -28,14 +28,13 @@ describe('useState', () => {
 })
 
 describe('calling setState', () => {
-
   let call
 
   const StatefulRectangle = props => {
     const [x, setX] = useState(10)
-  
+
     call = setX
-  
+
     return (
       <rectangle x={x} y={props.y} width={props.width} height={props.height} />
     )

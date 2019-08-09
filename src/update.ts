@@ -1,4 +1,4 @@
-import { onEventToEventName, eventNameToOnEventName, overlap } from "./utils";
+import { onEventToEventName, eventNameToOnEventName, overlap } from './utils'
 import { renderComponent } from './hooks'
 import draw from './draw'
 
@@ -6,13 +6,12 @@ let nodes: any[] = []
 let listeners = {}
 let ctx: CanvasRenderingContext2D
 
-function Component (props) {
+function Component(props) {
   // @ts-ignore
   this.props = props
 }
 
-Component.prototype.update = function (all) {
-
+Component.prototype.update = function(all) {
   window.requestAnimationFrame(() => render(ctx, currentVNode))
   // if (all) {
   //   console.log('update entrire canvas for', this)
@@ -21,12 +20,12 @@ Component.prototype.update = function (all) {
   // }
 }
 
-function doRender (props) {
+function doRender(props) {
   // @ts-ignore
   return this.constructor(props)
 }
 
-function getLastKnownPosition (vnode) {
+function getLastKnownPosition(vnode) {
   if (vnode._parent && vnode._parent._position) {
     return vnode._parent._position
   } else if (vnode._parent) {
@@ -36,7 +35,7 @@ function getLastKnownPosition (vnode) {
   }
 }
 
-function update (newVNode, oldVNode) {
+function update(newVNode, oldVNode) {
   const newType = newVNode.type
   const newProps = newVNode.props
   let tmp
@@ -47,7 +46,7 @@ function update (newVNode, oldVNode) {
     if (oldVNode && oldVNode._component) {
       c = newVNode._component = oldVNode._component
     } else {
-      newVNode._component  = c = new Component(newProps)
+      newVNode._component = c = new Component(newProps)
       c.constructor = newType
       c.render = doRender
     }
@@ -70,10 +69,11 @@ function update (newVNode, oldVNode) {
   return newVNode
 }
 
-function updateChildren (newParentVNode, oldParentVNode) {
+function updateChildren(newParentVNode, oldParentVNode) {
   let newChild, oldChild
   let newChildren = newParentVNode._children
-  let oldChildren = oldParentVNode && oldParentVNode._children ? oldParentVNode._children : []
+  let oldChildren =
+    oldParentVNode && oldParentVNode._children ? oldParentVNode._children : []
 
   if (!newChildren) return
 
@@ -97,27 +97,29 @@ function updateChildren (newParentVNode, oldParentVNode) {
 
 // Events
 
-function updateEvents (props) {
+function updateEvents(props) {
   let eventName
   if (!props) return
-  Object.keys(props).filter(key => key[0] + key[1] === 'on').forEach(eventKey => {
-    eventName = onEventToEventName(eventKey)
-    if (eventKey.toLowerCase() in ctx.canvas && !(eventName in listeners)) {
-      createListenerForEvent(eventName)
-    }
-  })
+  Object.keys(props)
+    .filter(key => key[0] + key[1] === 'on')
+    .forEach(eventKey => {
+      eventName = onEventToEventName(eventKey)
+      if (eventKey.toLowerCase() in ctx.canvas && !(eventName in listeners)) {
+        createListenerForEvent(eventName)
+      }
+    })
 }
 
 let canvasClientRect
 
-function getPositionFromEvent (event) {
+function getPositionFromEvent(event) {
   if (event instanceof MouseEvent) {
     return { x: event.offsetX, y: event.offsetY }
   }
 
   if (event instanceof TouchEvent) {
-    var x = event.changedTouches[0].pageX - canvasClientRect.left;
-    var y = event.changedTouches[0].pageY - canvasClientRect.top;
+    var x = event.changedTouches[0].pageX - canvasClientRect.left
+    var y = event.changedTouches[0].pageY - canvasClientRect.top
 
     return { x, y }
   }
@@ -127,7 +129,7 @@ function getPositionFromEvent (event) {
   return { x: undefined, y: undefined }
 }
 
-function createListenerForEvent(eventName) { 
+function createListenerForEvent(eventName) {
   const listener = e => {
     const position = getPositionFromEvent(e)
 
@@ -137,12 +139,16 @@ function createListenerForEvent(eventName) {
   ctx.canvas.addEventListener(eventName, listener)
 }
 
-function fireEvent (eventName, { x, y }, originalEvent) {
+function fireEvent(eventName, { x, y }, originalEvent) {
   let n
   const onEventName = eventNameToOnEventName(eventName)
   for (let i = 0; i < nodes.length; i++) {
     n = nodes[i]
-    if (n._dimensions && n._position && overlap({x, y}, { ...n._position, ...n._dimensions })) {
+    if (
+      n._dimensions &&
+      n._position &&
+      overlap({ x, y }, { ...n._position, ...n._dimensions })
+    ) {
       if (onEventName in n.props) {
         n.props[onEventName](originalEvent)
         break
@@ -154,7 +160,8 @@ function fireEvent (eventName, { x, y }, originalEvent) {
 const flatten = arr => {
   if (!Array.isArray(arr)) return arr
 
-  let curr, output:any[] = []
+  let curr,
+    output: any[] = []
   for (let i = 0; i < arr.length; i++) {
     curr = arr[i]
 
@@ -172,7 +179,7 @@ const flatten = arr => {
   }
 }
 
-function toChildArray (vnode: {}|[]) {
+function toChildArray(vnode: {} | []) {
   if (!vnode) return []
 
   if (!Array.isArray(vnode)) {
@@ -186,7 +193,7 @@ export default update
 
 let currentVNode
 
-export function render (canvasCtx, vnode) {
+export function render(canvasCtx, vnode) {
   ctx = canvasCtx
   if (!canvasClientRect) canvasClientRect = ctx.canvas.getBoundingClientRect()
   nodes = []

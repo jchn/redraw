@@ -27,16 +27,17 @@ describe('update children', () => {
   })
 
   it('should add _position property to child node', () => {
-    expect(vnode).toHaveProperty(['_children', 0, '_position'], { x: 30, y: 20 })
+    expect(vnode).toHaveProperty(['_children', 0, '_position'], {
+      x: 30,
+      y: 20,
+    })
   })
 })
 
 const Rectangle = props => <rectangle {...props} />
 
 describe('update function component', () => {
-  const vnode = (
-    <Rectangle x={10} y={10} width={10} height={10} />
-  )
+  const vnode = <Rectangle x={10} y={10} width={10} height={10} />
 
   update(vnode, {})
 
@@ -52,7 +53,9 @@ const RectangleWithNestedElements = props => (
 )
 
 describe('update function component with nested elements', () => {
-  const vnode = <RectangleWithNestedElements x={100} y={100} width={500} height={500} />
+  const vnode = (
+    <RectangleWithNestedElements x={100} y={100} width={500} height={500} />
+  )
   update(vnode, {})
 
   it('should add _children to vnode', () => {
@@ -64,7 +67,10 @@ describe('update function component with nested elements', () => {
   })
 
   it('should offset the _position of the child element', () => {
-    expect(vnode._children[0]._children[0]._position).toStrictEqual({ x: 110, y: 110 })
+    expect(vnode._children[0]._children[0]._position).toStrictEqual({
+      x: 110,
+      y: 110,
+    })
   })
 })
 
@@ -92,23 +98,22 @@ describe('function component with children prop', () => {
   })
 
   it('should offset the _position of the child element', () => {
-    expect(vnode._children[0]._children[0]._position).toStrictEqual({ x: 110, y: 110 })
+    expect(vnode._children[0]._children[0]._position).toStrictEqual({
+      x: 110,
+      y: 110,
+    })
   })
 })
 
 describe('updating node with existing component', () => {
-  const oldVNode = (
-    <Rectangle x={10} y={10} width={10} height={10} />
-  )
+  const oldVNode = <Rectangle x={10} y={10} width={10} height={10} />
 
-  const newVNode = (
-    <Rectangle x={15} y={10} width={10} height={10} />
-  )
+  const newVNode = <Rectangle x={15} y={10} width={10} height={10} />
 
   it('should retain the same component instance if consecutive updates are of the function type', () => {
     const c1 = update(oldVNode, {})._component
     const c2 = update(newVNode, oldVNode)._component
-  
+
     expect(c1).toBe(c2)
   })
 })
@@ -124,7 +129,15 @@ describe('render props', () => {
     <circle x={0} y={0} width={5} height={5} foo={foo} />
   )
 
-  const vnode = <RectangleWithRenderProp x={10} y={10} width={10} height={10} render={render} />
+  const vnode = (
+    <RectangleWithRenderProp
+      x={10}
+      y={10}
+      width={10}
+      height={10}
+      render={render}
+    />
+  )
 
   update(vnode, {})
 

@@ -1,4 +1,4 @@
-import withApplyStylesToCtx, { StyleObject } from "./withApplyStylesToCtx"
+import withApplyStylesToCtx, { StyleObject } from './withApplyStylesToCtx'
 
 interface props {
   x: number
@@ -9,7 +9,10 @@ interface props {
   style?: StyleObject
 }
 
-const drawImage = (ctx: CanvasRenderingContext2D, { x, y, width, height, src }: props) => {
+const drawImage = (
+  ctx: CanvasRenderingContext2D,
+  { x, y, width, height, src }: props
+) => {
   ctx.drawImage(src, x, y, width, height)
 }
 

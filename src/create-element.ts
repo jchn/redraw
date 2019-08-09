@@ -1,11 +1,11 @@
-function createElement (type, props, ...children) {
+function createElement(type, props, ...children) {
   return createVNode({
     type,
-    props: Object.assign(props, { children })
+    props: Object.assign(props, { children }),
   })
 }
 
-function createVNode ({ type, props }) {
+function createVNode({ type, props }) {
   return {
     type,
     props,
@@ -14,7 +14,7 @@ function createVNode ({ type, props }) {
     _dimensions: null,
     _component: null,
     _parent: null,
-    _depth: 0
+    _depth: 0,
   }
 }
 
