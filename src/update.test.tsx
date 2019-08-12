@@ -1,5 +1,6 @@
 import createElement from './create-element'
 import update from './update'
+import { mat2d } from 'gl-matrix'
 
 describe('update element', () => {
   const vnode = <rectangle x={0} y={0} width={10} height={10} />
@@ -11,6 +12,10 @@ describe('update element', () => {
 
   it('should add _position to vnode', () => {
     expect(vnode).toHaveProperty('_position', { x: 0, y: 0 })
+  })
+
+  it('should add _matrix to vnode', () => {
+    expect(vnode).toHaveProperty('_matrix', mat2d.fromValues(0, 0, 0, 0, 0, 0))
   })
 })
 
@@ -31,6 +36,13 @@ describe('update children', () => {
       x: 30,
       y: 20,
     })
+  })
+
+  it('should add _matrix property to child node', () => {
+    expect(vnode).toHaveProperty(
+      ['_children', 0, '_matrix'],
+      mat2d.fromValues(0, 0, 0, 0, 30, 20)
+    )
   })
 })
 
@@ -66,11 +78,23 @@ describe('update function component with nested elements', () => {
     expect(vnode._children[0]._position).toStrictEqual({ x: 100, y: 100 })
   })
 
+  it('should add _matrix property to nested element', () => {
+    expect(vnode._children[0]._matrix).toStrictEqual(
+      mat2d.fromValues(0, 0, 0, 0, 100, 100)
+    )
+  })
+
   it('should offset the _position of the child element', () => {
     expect(vnode._children[0]._children[0]._position).toStrictEqual({
       x: 110,
       y: 110,
     })
+  })
+
+  it('should offset the _matrix of the child element', () => {
+    expect(vnode._children[0]._children[0]._matrix).toStrictEqual(
+      mat2d.fromValues(0, 0, 0, 0, 110, 110)
+    )
   })
 })
 
@@ -97,11 +121,23 @@ describe('function component with children prop', () => {
     expect(vnode._children[0]._position).toStrictEqual({ x: 100, y: 100 })
   })
 
+  it('should add _matrix property to nested element', () => {
+    expect(vnode._children[0]._matrix).toStrictEqual(
+      mat2d.fromValues(0, 0, 0, 0, 100, 100)
+    )
+  })
+
   it('should offset the _position of the child element', () => {
     expect(vnode._children[0]._children[0]._position).toStrictEqual({
       x: 110,
       y: 110,
     })
+  })
+
+  it('should offset the _matrix of the child element', () => {
+    expect(vnode._children[0]._children[0]._matrix).toStrictEqual(
+      mat2d.fromValues(0, 0, 0, 0, 110, 110)
+    )
   })
 })
 
@@ -145,6 +181,9 @@ describe('render props', () => {
     expect(vnode._children[0]._children[0]).toHaveProperty('type', 'circle')
     expect(vnode._children[0]._children[0]._position).toHaveProperty('x', 10)
     expect(vnode._children[0]._children[0]._position).toHaveProperty('y', 10)
+    expect(vnode._children[0]._children[0]._matrix).toEqual(
+      mat2d.fromValues(0, 0, 0, 0, 10, 10)
+    )
     expect(vnode._children[0]._children[0].props).toHaveProperty('foo', 'bar')
   })
 })

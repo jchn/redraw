@@ -1,6 +1,7 @@
 import { onEventToEventName, eventNameToOnEventName, overlap } from './utils'
 import { renderComponent } from './hooks'
 import draw from './draw'
+import { mat2d } from 'gl-matrix'
 
 let nodes: any[] = []
 let listeners = {}
@@ -35,6 +36,16 @@ function getLastKnownPosition(vnode) {
   }
 }
 
+function getLastKnowMatrix(vnode) {
+  if (vnode._parent && vnode._parent._matrix) {
+    return vnode._parent._matrix
+  } else if (vnode._parent) {
+    return getLastKnownPosition(vnode._parent)
+  } else {
+    return mat2d.fromValues(0, 0, 0, 0, 0, 0)
+  }
+}
+
 function update(newVNode, oldVNode) {
   const newType = newVNode.type
   const newProps = newVNode.props
@@ -57,8 +68,15 @@ function update(newVNode, oldVNode) {
     newVNode._children = toChildArray(tmp) // probably have to do some sanitizing on this value
   } else {
     const offset = getLastKnownPosition(newVNode)
+    const parentMatrix = getLastKnowMatrix(newVNode)
     newVNode._position = { x: newProps.x + offset.x, y: newProps.y + offset.y }
     newVNode._dimensions = { width: newProps.width, height: newProps.height }
+
+    mat2d.add(
+      newVNode._matrix,
+      mat2d.fromValues(0, 0, 0, 0, newProps.x, newProps.y),
+      parentMatrix
+    )
 
     nodes.push(newVNode)
     updateEvents(newVNode.props)
