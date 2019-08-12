@@ -20,6 +20,7 @@ function draw(ctx, vnode, clear = true) {
         ctx,
         Object.assign({}, props, _position, _dimensions, {
           children: _children,
+          matrix: vnode._matrix,
         })
       )
       props.clip && ctx.clip()

@@ -17,7 +17,6 @@ function createVNode({ type, props }) {
     _component: null,
     _parent: null,
     _depth: 0,
-    _matrix: mat2d.fromValues(0, 0, 0, 0, 0, 0),
   }
 }
 

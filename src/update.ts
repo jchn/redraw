@@ -1,7 +1,12 @@
-import { onEventToEventName, eventNameToOnEventName, overlap } from './utils'
+import {
+  onEventToEventName,
+  eventNameToOnEventName,
+  overlap,
+  deg2rad,
+} from './utils'
 import { renderComponent } from './hooks'
 import draw from './draw'
-import { mat2d } from 'gl-matrix'
+import { mat2d, vec2 } from 'gl-matrix'
 
 let nodes: any[] = []
 let listeners = {}
@@ -40,9 +45,9 @@ function getLastKnowMatrix(vnode) {
   if (vnode._parent && vnode._parent._matrix) {
     return vnode._parent._matrix
   } else if (vnode._parent) {
-    return getLastKnownPosition(vnode._parent)
+    return getLastKnowMatrix(vnode._parent)
   } else {
-    return mat2d.fromValues(0, 0, 0, 0, 0, 0)
+    return mat2d.create()
   }
 }
 
@@ -72,11 +77,20 @@ function update(newVNode, oldVNode) {
     newVNode._position = { x: newProps.x + offset.x, y: newProps.y + offset.y }
     newVNode._dimensions = { width: newProps.width, height: newProps.height }
 
-    mat2d.add(
+    if (!newVNode._matrix) {
+      newVNode._matrix = mat2d.create()
+    }
+
+    mat2d.copy(newVNode._matrix, parentMatrix)
+
+    mat2d.translate(
       newVNode._matrix,
-      mat2d.fromValues(0, 0, 0, 0, newProps.x, newProps.y),
-      parentMatrix
+      newVNode._matrix,
+      vec2.fromValues(newProps.x, newProps.y)
     )
+
+    if (newProps.rotate)
+      mat2d.rotate(newVNode._matrix, newVNode._matrix, deg2rad(newProps.rotate))
 
     nodes.push(newVNode)
     updateEvents(newVNode.props)
