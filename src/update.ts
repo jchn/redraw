@@ -93,7 +93,6 @@ function update(newVNode, oldVNode) {
       mat2d.rotate(newVNode._matrix, newVNode._matrix, deg2rad(newProps.rotate))
 
     nodes.push(newVNode)
-    updateEvents(newVNode.props)
     newVNode._children = toChildArray(newVNode.props.children)
   }
   updateChildren(newVNode, oldVNode)
@@ -127,67 +126,7 @@ function updateChildren(newParentVNode, oldParentVNode) {
   }
 }
 
-// Events
-
-function updateEvents(props) {
-  let eventName
-  if (!props) return
-  Object.keys(props)
-    .filter(key => key[0] + key[1] === 'on')
-    .forEach(eventKey => {
-      eventName = onEventToEventName(eventKey)
-      if (eventKey.toLowerCase() in ctx.canvas && !(eventName in listeners)) {
-        createListenerForEvent(eventName)
-      }
-    })
-}
-
 let canvasClientRect
-
-function getPositionFromEvent(event) {
-  if (event instanceof MouseEvent) {
-    return { x: event.offsetX, y: event.offsetY }
-  }
-
-  if (event instanceof TouchEvent) {
-    var x = event.changedTouches[0].pageX - canvasClientRect.left
-    var y = event.changedTouches[0].pageY - canvasClientRect.top
-
-    return { x, y }
-  }
-
-  console.warn('event', event, 'not yet supported')
-
-  return { x: undefined, y: undefined }
-}
-
-function createListenerForEvent(eventName) {
-  const listener = e => {
-    const position = getPositionFromEvent(e)
-
-    fireEvent(eventName, position, e)
-  }
-  listeners[eventName] = listener
-  ctx.canvas.addEventListener(eventName, listener)
-}
-
-function fireEvent(eventName, { x, y }, originalEvent) {
-  let n
-  const onEventName = eventNameToOnEventName(eventName)
-  for (let i = 0; i < nodes.length; i++) {
-    n = nodes[i]
-    if (
-      n._dimensions &&
-      n._position &&
-      overlap({ x, y }, { ...n._position, ...n._dimensions })
-    ) {
-      if (onEventName in n.props) {
-        n.props[onEventName](originalEvent)
-        break
-      }
-    }
-  }
-}
 
 const flatten = arr => {
   if (!Array.isArray(arr)) return arr
@@ -223,13 +162,84 @@ function toChildArray(vnode: {} | []) {
 
 export default update
 
+// Events
+
+const setupListeners = () => {
+  const eventTypeToPropName = {
+    click: 'onClick',
+    dblclick: 'onDoubleClick',
+    mouseup: 'onMouseUp',
+    mousedown: 'onMouseDown',
+    mousemove: 'onMouseMove',
+
+    touchstart: 'onTouchStart',
+    touchend: 'onTouchEnd',
+    touchmove: 'onTouchMove',
+  }
+
+  function mouseEventHandler(e: MouseEvent) {
+    const { type, offsetX, offsetY } = e
+    let n
+    for (let i = 0; i < nodes.length; i++) {
+      n = nodes[i]
+      if (ctx.isPointInPath(n._path, offsetX, offsetY)) {
+        if (eventTypeToPropName[type] in n.props) {
+          n.props[eventTypeToPropName[type]](e)
+          break
+        }
+      }
+    }
+  }
+
+  ctx.canvas.addEventListener('click', mouseEventHandler)
+  ctx.canvas.addEventListener('dblclick', mouseEventHandler)
+  ctx.canvas.addEventListener('mouseup', mouseEventHandler)
+  ctx.canvas.addEventListener('mousedown', mouseEventHandler)
+  ctx.canvas.addEventListener('mousemove', mouseEventHandler)
+
+  // for now just take the first touch from the touches list
+  function touchEventHandler(e: TouchEvent) {
+    const { touches } = e
+    const touch = touches[0]
+
+    if (!touch) return
+
+    const { clientX, clientY } = touch
+
+    const x = clientX - canvasClientRect.x
+    const y = clientY - canvasClientRect.y
+
+    const { type } = e
+    let n
+    for (let i = 0; i < nodes.length; i++) {
+      n = nodes[i]
+      if (ctx.isPointInPath(n._path, x, y)) {
+        if (eventTypeToPropName[type] in n.props) {
+          n.props[eventTypeToPropName[type]](e)
+          break
+        }
+      }
+    }
+  }
+
+  ctx.canvas.addEventListener('touchstart', touchEventHandler)
+  ctx.canvas.addEventListener('touchend', touchEventHandler)
+  ctx.canvas.addEventListener('touchmove', touchEventHandler)
+}
+
 let currentVNode
+let init = false
 
 export function render(canvasCtx, vnode) {
   ctx = canvasCtx
+
   if (!canvasClientRect) canvasClientRect = ctx.canvas.getBoundingClientRect()
   nodes = []
   currentVNode = update(vnode, currentVNode || {})
   draw(ctx, currentVNode)
   nodes.reverse()
+  if (!init) {
+    init = true
+    setupListeners()
+  }
 }

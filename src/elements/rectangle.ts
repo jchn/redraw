@@ -8,12 +8,22 @@ interface props {
   height: number
   style?: StyleObject
   matrix: Float32Array
+  path: Path2D
 }
 
-const drawRect = (
-  ctx: CanvasRenderingContext2D,
-  { x, y, width, height, style, matrix }: props
-) => {
+const drawRect = (ctx: CanvasRenderingContext2D, { path, style }: props) => {
+  ctx.stroke(path)
+
+  ctx.fill(path)
+  if (style && style.lineWidth) ctx.stroke(path)
+}
+
+export const createPath = vnode => {
+  const matrix = vnode._matrix
+  const { width, height } = vnode.props
+
+  const p = new Path2D()
+
   const x1 = 0
   const y1 = 0
 
@@ -27,16 +37,14 @@ const drawRect = (
   vec2.transformMat2d(p3, p3, matrix)
   vec2.transformMat2d(p4, p4, matrix)
 
-  ctx.beginPath()
+  p.moveTo(p1[0], p1[1])
+  p.lineTo(p2[0], p2[1])
+  p.lineTo(p3[0], p3[1])
+  p.lineTo(p4[0], p4[1])
+  p.lineTo(p1[0], p1[1])
+  p.closePath()
 
-  ctx.moveTo(p1[0], p1[1])
-  ctx.lineTo(p2[0], p2[1])
-  ctx.lineTo(p3[0], p3[1])
-  ctx.lineTo(p4[0], p4[1])
-  ctx.lineTo(p1[0], p1[1])
-
-  ctx.fill()
-  if (style && style.lineWidth) ctx.stroke()
+  return p
 }
 
 export const draw = withApplyStylesToCtx(drawRect)
