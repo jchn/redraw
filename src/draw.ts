@@ -17,11 +17,7 @@ function draw(ctx, vnode, clear = true) {
   if (typeof type === 'string') {
     if (type in elementTypes) {
       vnode._path = elementTypes[type].createPath(vnode)
-      elementTypes[type].draw(ctx, {
-        path: vnode._path,
-        style: vnode.props.style,
-      })
-      props.clip && ctx.clip()
+      elementTypes[type].draw(ctx, vnode)
     }
   }
 

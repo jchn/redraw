@@ -11,7 +11,10 @@ interface props {
   path: Path2D
 }
 
-const drawRect = (ctx: CanvasRenderingContext2D, { path, style }: props) => {
+const drawRect = (ctx: CanvasRenderingContext2D, vnode) => {
+  const style = vnode.props.style
+  const path = vnode._path
+
   ctx.stroke(path)
 
   ctx.fill(path)
