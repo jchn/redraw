@@ -1,15 +1,17 @@
-import {
-  onEventToEventName,
-  eventNameToOnEventName,
-  overlap,
-  deg2rad,
-} from './utils'
+import { deg2rad } from './utils'
 import { renderComponent } from './hooks'
 import draw from './draw'
 import { mat2d, vec2 } from 'gl-matrix'
+import { rectangle, image, circle, text } from './elements'
+
+const elementTypes = {
+  rectangle,
+  image,
+  circle,
+  text,
+}
 
 let nodes: any[] = []
-let listeners = {}
 let ctx: CanvasRenderingContext2D
 
 function Component(props) {
@@ -93,6 +95,10 @@ function update(newVNode, oldVNode) {
 
     if (newProps.rotate)
       mat2d.rotate(newVNode._matrix, newVNode._matrix, deg2rad(newProps.rotate))
+
+    // needed for anchor point and updates the matrix, each element knows how to calculate its bounding box
+    // [0, 0] sets anchor to top-left, [1, 1] sets anchor to bottom-right
+    if (newProps.anchor) elementTypes[newType].setAnchor(newVNode)
 
     nodes.push(newVNode)
     newVNode._children = toChildArray(newVNode.props.children)

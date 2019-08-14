@@ -73,4 +73,8 @@ export const createPath = vnode => {
   return p
 }
 
+export const setAnchor = vnode => {
+  // no-op for now, bounding box is dependant on text
+}
+
 export const draw = withApplyStylesToCtx(drawText)

@@ -1,5 +1,5 @@
 import withApplyStylesToCtx, { StyleObject } from './withApplyStylesToCtx'
-import { vec2 } from 'gl-matrix'
+import { vec2, mat2d } from 'gl-matrix'
 
 interface props {
   x: number
@@ -63,6 +63,16 @@ export const createPath = vnode => {
   p.bezierCurveTo(h7[0], h7[1], h8[0], h8[1], p1[0], p1[1])
 
   return p
+}
+
+export const setAnchor = vnode => {
+  const matrix = vnode._matrix
+  const { radius, anchor = [0, 0] } = vnode.props
+
+  const offsetX = -radius * 2 * anchor[0]
+  const offsetY = -radius * 2 * anchor[1]
+
+  mat2d.translate(matrix, matrix, vec2.fromValues(offsetX, offsetY))
 }
 
 export const draw = withApplyStylesToCtx(drawCircle)

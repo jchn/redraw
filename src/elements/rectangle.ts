@@ -1,5 +1,5 @@
 import withApplyStylesToCtx, { StyleObject } from './withApplyStylesToCtx'
-import { vec2 } from 'gl-matrix'
+import { vec2, mat2d } from 'gl-matrix'
 
 interface props {
   x: number
@@ -48,6 +48,16 @@ export const createPath = vnode => {
   p.closePath()
 
   return p
+}
+
+export const setAnchor = vnode => {
+  const matrix = vnode._matrix
+  const { width, height, anchor = [0, 0] } = vnode.props
+
+  const offsetX = -width * anchor[0]
+  const offsetY = -height * anchor[1]
+
+  mat2d.translate(matrix, matrix, vec2.fromValues(offsetX, offsetY))
 }
 
 export const draw = withApplyStylesToCtx(drawRect)
