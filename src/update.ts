@@ -18,7 +18,9 @@ function Component(props) {
 }
 
 Component.prototype.update = function(all) {
-  window.requestAnimationFrame(() => render(ctx, currentVNode))
+  window.requestAnimationFrame(() =>
+    render(ctx, Object.assign({}, currentVNode))
+  )
   // if (all) {
   //   console.log('update entrire canvas for', this)
   // } else {
@@ -114,13 +116,12 @@ function updateChildren(newParentVNode, oldParentVNode) {
 
   for (let i = 0; i < newChildren.length; i++) {
     newChild = newChildren[i]
+    oldChild = oldChildren[i]
 
     if (newChild === null || typeof newChild === 'string') continue
 
     newChild._parent = newParentVNode
     newChild._depth = newParentVNode._depth + 1
-
-    oldChild = oldChildren[i]
 
     update(newChild, oldChild)
   }
