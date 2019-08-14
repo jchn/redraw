@@ -181,6 +181,7 @@ const setupListeners = () => {
 
     touchstart: 'onTouchStart',
     touchend: 'onTouchEnd',
+    touchcancel: 'onTouchCancel',
     touchmove: 'onTouchMove',
   }
 
@@ -209,6 +210,18 @@ const setupListeners = () => {
     const { touches } = e
     const touch = touches[0]
 
+    const { type } = e
+    let n
+
+    if (e.type === 'touchend' || e.type === 'touchcancel') {
+      for (let i = 0; i < nodes.length; i++) {
+        n = nodes[i]
+        if (eventTypeToPropName[type] in n.props) {
+          n.props[eventTypeToPropName[type]](e)
+        }
+      }
+    }
+
     if (!touch) return
 
     const { clientX, clientY } = touch
@@ -216,8 +229,6 @@ const setupListeners = () => {
     const x = clientX - canvasClientRect.x
     const y = clientY - canvasClientRect.y
 
-    const { type } = e
-    let n
     for (let i = 0; i < nodes.length; i++) {
       n = nodes[i]
       if (ctx.isPointInPath(n._path, x, y)) {
@@ -231,6 +242,7 @@ const setupListeners = () => {
 
   ctx.canvas.addEventListener('touchstart', touchEventHandler)
   ctx.canvas.addEventListener('touchend', touchEventHandler)
+  ctx.canvas.addEventListener('touchcancel', touchEventHandler)
   ctx.canvas.addEventListener('touchmove', touchEventHandler)
 }
 
