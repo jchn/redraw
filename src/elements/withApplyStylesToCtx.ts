@@ -31,7 +31,7 @@ const withApplyStylesToCtx = drawFn => (
   vnode
 ) => {
   const props = vnode.props
-  if (!props.style) return drawFn(ctx, props)
+  if (!props.style) return drawFn(ctx, vnode)
 
   for (let key in props.style) {
     ctx[key] = props.style[key]
