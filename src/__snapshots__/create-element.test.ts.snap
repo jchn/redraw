@@ -6,14 +6,6 @@ Object {
   "_component": null,
   "_depth": 0,
   "_dimensions": null,
-  "_matrix": Float32Array [
-    1,
-    0,
-    0,
-    1,
-    0,
-    0,
-  ],
   "_parent": null,
   "_position": null,
   "props": Object {

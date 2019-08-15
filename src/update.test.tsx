@@ -204,8 +204,9 @@ describe('update rotation', () => {
     update(vnode, {})
 
     const expMatrix = mat2d.create()
-    mat2d.rotate(expMatrix, expMatrix, deg2rad(90))
+
     mat2d.translate(expMatrix, expMatrix, vec2.fromValues(10, 10))
+    mat2d.rotate(expMatrix, expMatrix, deg2rad(90))
 
     expect(vnode._matrix).toEqual(expMatrix)
   })
@@ -220,8 +221,9 @@ describe('update rotation', () => {
     update(vnode, {})
 
     const expMatrix = mat2d.create()
+    mat2d.translate(expMatrix, expMatrix, vec2.fromValues(10, 10))
     mat2d.rotate(expMatrix, expMatrix, deg2rad(90))
-    mat2d.translate(expMatrix, expMatrix, vec2.fromValues(20, 20))
+    mat2d.translate(expMatrix, expMatrix, vec2.fromValues(10, 10))
 
     expect(vnode._children[0]._matrix).toEqual(expMatrix)
   })
