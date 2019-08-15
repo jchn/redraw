@@ -35,16 +35,6 @@ function doRender(props) {
   return this.constructor(props)
 }
 
-function getLastKnownPosition(vnode) {
-  if (vnode._parent && vnode._parent._position) {
-    return vnode._parent._position
-  } else if (vnode._parent) {
-    return getLastKnownPosition(vnode._parent)
-  } else {
-    return { x: 0, y: 0 }
-  }
-}
-
 function getLastKnowMatrix(vnode) {
   if (vnode._parent && vnode._parent._matrix) {
     return vnode._parent._matrix
@@ -76,9 +66,7 @@ function update(newVNode, oldVNode) {
 
     newVNode._children = toChildArray(tmp) // probably have to do some sanitizing on this value
   } else {
-    const offset = getLastKnownPosition(newVNode)
     const parentMatrix = getLastKnowMatrix(newVNode)
-    newVNode._position = { x: newProps.x + offset.x, y: newProps.y + offset.y }
     newVNode._dimensions = { width: newProps.width, height: newProps.height }
 
     if (!newVNode._matrix) {

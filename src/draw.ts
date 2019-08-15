@@ -10,7 +10,7 @@ const elementTypes = {
 function draw(ctx, vnode, clear = true) {
   if (!vnode) return
   if (clear) ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height)
-  const { type, props, _children, _position, _dimensions } = vnode
+  const { type, _children } = vnode
 
   ctx.save()
 
