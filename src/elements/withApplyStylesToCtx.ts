@@ -28,14 +28,15 @@ export interface StyleObject {
 
 const withApplyStylesToCtx = drawFn => (
   ctx: CanvasRenderingContext2D,
-  props
+  vnode
 ) => {
-  if (!props.style) return drawFn(ctx, props)
+  const props = vnode.props
+  if (!props.style) return drawFn(ctx, vnode)
 
   for (let key in props.style) {
     ctx[key] = props.style[key]
   }
-  drawFn(ctx, props)
+  drawFn(ctx, vnode)
 }
 
 export default withApplyStylesToCtx

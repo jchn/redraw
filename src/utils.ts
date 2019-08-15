@@ -42,3 +42,7 @@ export function overlap(point, rectangle) {
     point.y < rectangle.y + rectangle.height
   )
 }
+
+export function deg2rad(deg) {
+  return (deg * Math.PI) / 180
+}

@@ -1,5 +1,7 @@
 import createElement from './create-element'
 import update from './update'
+import { mat2d, vec2 } from 'gl-matrix'
+import { deg2rad } from './utils'
 
 describe('update element', () => {
   const vnode = <rectangle x={0} y={0} width={10} height={10} />
@@ -9,8 +11,8 @@ describe('update element', () => {
     expect(vnode).toHaveProperty('_dimensions', { width: 10, height: 10 })
   })
 
-  it('should add _position to vnode', () => {
-    expect(vnode).toHaveProperty('_position', { x: 0, y: 0 })
+  it('should add _matrix to vnode', () => {
+    expect(vnode).toHaveProperty('_matrix', mat2d.fromValues(1, 0, 0, 1, 0, 0))
   })
 })
 
@@ -26,11 +28,11 @@ describe('update children', () => {
     expect(vnode._children).toHaveLength(1)
   })
 
-  it('should add _position property to child node', () => {
-    expect(vnode).toHaveProperty(['_children', 0, '_position'], {
-      x: 30,
-      y: 20,
-    })
+  it('should add _matrix property to child node', () => {
+    expect(vnode).toHaveProperty(
+      ['_children', 0, '_matrix'],
+      mat2d.fromValues(1, 0, 0, 1, 30, 20)
+    )
   })
 })
 
@@ -62,15 +64,16 @@ describe('update function component with nested elements', () => {
     expect(vnode._children).toHaveLength(1)
   })
 
-  it('should add _position property to nested element', () => {
-    expect(vnode._children[0]._position).toStrictEqual({ x: 100, y: 100 })
+  it('should add _matrix property to nested element', () => {
+    expect(vnode._children[0]._matrix).toStrictEqual(
+      mat2d.fromValues(1, 0, 0, 1, 100, 100)
+    )
   })
 
-  it('should offset the _position of the child element', () => {
-    expect(vnode._children[0]._children[0]._position).toStrictEqual({
-      x: 110,
-      y: 110,
-    })
+  it('should offset the _matrix of the child element', () => {
+    expect(vnode._children[0]._children[0]._matrix).toStrictEqual(
+      mat2d.fromValues(1, 0, 0, 1, 110, 110)
+    )
   })
 })
 
@@ -93,15 +96,16 @@ describe('function component with children prop', () => {
     expect(vnode._children).toHaveLength(1)
   })
 
-  it('should add _position property to nested element', () => {
-    expect(vnode._children[0]._position).toStrictEqual({ x: 100, y: 100 })
+  it('should add _matrix property to nested element', () => {
+    expect(vnode._children[0]._matrix).toStrictEqual(
+      mat2d.fromValues(1, 0, 0, 1, 100, 100)
+    )
   })
 
-  it('should offset the _position of the child element', () => {
-    expect(vnode._children[0]._children[0]._position).toStrictEqual({
-      x: 110,
-      y: 110,
-    })
+  it('should offset the _matrix of the child element', () => {
+    expect(vnode._children[0]._children[0]._matrix).toStrictEqual(
+      mat2d.fromValues(1, 0, 0, 1, 110, 110)
+    )
   })
 })
 
@@ -143,8 +147,9 @@ describe('render props', () => {
 
   it('should render via props', () => {
     expect(vnode._children[0]._children[0]).toHaveProperty('type', 'circle')
-    expect(vnode._children[0]._children[0]._position).toHaveProperty('x', 10)
-    expect(vnode._children[0]._children[0]._position).toHaveProperty('y', 10)
+    expect(vnode._children[0]._children[0]._matrix).toEqual(
+      mat2d.fromValues(1, 0, 0, 1, 10, 10)
+    )
     expect(vnode._children[0]._children[0].props).toHaveProperty('foo', 'bar')
   })
 })
@@ -155,5 +160,36 @@ describe('component instances', () => {
     update(vnode, {})
 
     expect(vnode._component).toHaveProperty('update')
+  })
+})
+
+describe('update rotation', () => {
+  const vnode = <rectangle x={10} y={10} width={10} height={10} rotate={90} />
+  it('should rotate _matrix of the vnode', () => {
+    update(vnode, {})
+
+    const expMatrix = mat2d.create()
+
+    mat2d.translate(expMatrix, expMatrix, vec2.fromValues(10, 10))
+    mat2d.rotate(expMatrix, expMatrix, deg2rad(90))
+
+    expect(vnode._matrix).toEqual(expMatrix)
+  })
+
+  it('should rotate the _matrix of a child of a vnode', () => {
+    const vnode = (
+      <rectangle x={10} y={10} width={100} height={100} rotate={90}>
+        <rectangle x={10} y={10} width={10} height={10} />
+      </rectangle>
+    )
+
+    update(vnode, {})
+
+    const expMatrix = mat2d.create()
+    mat2d.translate(expMatrix, expMatrix, vec2.fromValues(10, 10))
+    mat2d.rotate(expMatrix, expMatrix, deg2rad(90))
+    mat2d.translate(expMatrix, expMatrix, vec2.fromValues(10, 10))
+
+    expect(vnode._children[0]._matrix).toEqual(expMatrix)
   })
 })

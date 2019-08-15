@@ -1,3 +1,5 @@
+import { mat2d } from 'gl-matrix'
+
 function createElement(type, props, ...children) {
   return createVNode({
     type,
@@ -10,7 +12,6 @@ function createVNode({ type, props }) {
     type,
     props,
     _children: null,
-    _position: null,
     _dimensions: null,
     _component: null,
     _parent: null,

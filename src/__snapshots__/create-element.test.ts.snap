@@ -7,7 +7,6 @@ Object {
   "_depth": 0,
   "_dimensions": null,
   "_parent": null,
-  "_position": null,
   "props": Object {
     "children": Array [],
     "foo": "bar",

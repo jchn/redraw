@@ -1,9 +1,17 @@
-import { onEventToEventName, eventNameToOnEventName, overlap } from './utils'
+import { deg2rad } from './utils'
 import { renderComponent } from './hooks'
 import draw from './draw'
+import { mat2d, vec2 } from 'gl-matrix'
+import { rectangle, image, circle, text } from './elements'
+
+const elementTypes = {
+  rectangle,
+  image,
+  circle,
+  text,
+}
 
 let nodes: any[] = []
-let listeners = {}
 let ctx: CanvasRenderingContext2D
 
 function Component(props) {
@@ -12,7 +20,9 @@ function Component(props) {
 }
 
 Component.prototype.update = function(all) {
-  window.requestAnimationFrame(() => render(ctx, currentVNode))
+  window.requestAnimationFrame(() =>
+    render(ctx, Object.assign({}, currentVNode))
+  )
   // if (all) {
   //   console.log('update entrire canvas for', this)
   // } else {
@@ -25,13 +35,13 @@ function doRender(props) {
   return this.constructor(props)
 }
 
-function getLastKnownPosition(vnode) {
-  if (vnode._parent && vnode._parent._position) {
-    return vnode._parent._position
+function getLastKnowMatrix(vnode) {
+  if (vnode._parent && vnode._parent._matrix) {
+    return vnode._parent._matrix
   } else if (vnode._parent) {
-    return getLastKnownPosition(vnode._parent)
+    return getLastKnowMatrix(vnode._parent)
   } else {
-    return { x: 0, y: 0 }
+    return mat2d.create()
   }
 }
 
@@ -56,12 +66,29 @@ function update(newVNode, oldVNode) {
 
     newVNode._children = toChildArray(tmp) // probably have to do some sanitizing on this value
   } else {
-    const offset = getLastKnownPosition(newVNode)
-    newVNode._position = { x: newProps.x + offset.x, y: newProps.y + offset.y }
+    const parentMatrix = getLastKnowMatrix(newVNode)
     newVNode._dimensions = { width: newProps.width, height: newProps.height }
 
+    if (!newVNode._matrix) {
+      newVNode._matrix = mat2d.create()
+    }
+
+    mat2d.copy(newVNode._matrix, parentMatrix)
+
+    mat2d.translate(
+      newVNode._matrix,
+      newVNode._matrix,
+      vec2.fromValues(newProps.x, newProps.y)
+    )
+
+    if (newProps.rotate)
+      mat2d.rotate(newVNode._matrix, newVNode._matrix, deg2rad(newProps.rotate))
+
+    // needed for anchor point and updates the matrix, each element knows how to calculate its bounding box
+    // [0, 0] sets anchor to top-left, [1, 1] sets anchor to bottom-right
+    if (newProps.anchor) elementTypes[newType].setAnchor(newVNode)
+
     nodes.push(newVNode)
-    updateEvents(newVNode.props)
     newVNode._children = toChildArray(newVNode.props.children)
   }
   updateChildren(newVNode, oldVNode)
@@ -83,79 +110,18 @@ function updateChildren(newParentVNode, oldParentVNode) {
 
   for (let i = 0; i < newChildren.length; i++) {
     newChild = newChildren[i]
+    oldChild = oldChildren[i]
 
     if (newChild === null || typeof newChild === 'string') continue
 
     newChild._parent = newParentVNode
     newChild._depth = newParentVNode._depth + 1
 
-    oldChild = oldChildren[i]
-
     update(newChild, oldChild)
   }
 }
 
-// Events
-
-function updateEvents(props) {
-  let eventName
-  if (!props) return
-  Object.keys(props)
-    .filter(key => key[0] + key[1] === 'on')
-    .forEach(eventKey => {
-      eventName = onEventToEventName(eventKey)
-      if (eventKey.toLowerCase() in ctx.canvas && !(eventName in listeners)) {
-        createListenerForEvent(eventName)
-      }
-    })
-}
-
 let canvasClientRect
-
-function getPositionFromEvent(event) {
-  if (event instanceof MouseEvent) {
-    return { x: event.offsetX, y: event.offsetY }
-  }
-
-  if (event instanceof TouchEvent) {
-    var x = event.changedTouches[0].pageX - canvasClientRect.left
-    var y = event.changedTouches[0].pageY - canvasClientRect.top
-
-    return { x, y }
-  }
-
-  console.warn('event', event, 'not yet supported')
-
-  return { x: undefined, y: undefined }
-}
-
-function createListenerForEvent(eventName) {
-  const listener = e => {
-    const position = getPositionFromEvent(e)
-
-    fireEvent(eventName, position, e)
-  }
-  listeners[eventName] = listener
-  ctx.canvas.addEventListener(eventName, listener)
-}
-
-function fireEvent(eventName, { x, y }, originalEvent) {
-  let n
-  const onEventName = eventNameToOnEventName(eventName)
-  for (let i = 0; i < nodes.length; i++) {
-    n = nodes[i]
-    if (
-      n._dimensions &&
-      n._position &&
-      overlap({ x, y }, { ...n._position, ...n._dimensions })
-    ) {
-      if (onEventName in n.props) {
-        n.props[onEventName](originalEvent)
-        break
-      }
-    }
-  }
-}
 
 const flatten = arr => {
   if (!Array.isArray(arr)) return arr
@@ -191,13 +157,96 @@ function toChildArray(vnode: {} | []) {
 
 export default update
 
+// Events
+
+const setupListeners = () => {
+  const eventTypeToPropName = {
+    click: 'onClick',
+    dblclick: 'onDoubleClick',
+    mouseup: 'onMouseUp',
+    mousedown: 'onMouseDown',
+    mousemove: 'onMouseMove',
+
+    touchstart: 'onTouchStart',
+    touchend: 'onTouchEnd',
+    touchcancel: 'onTouchCancel',
+    touchmove: 'onTouchMove',
+  }
+
+  function mouseEventHandler(e: MouseEvent) {
+    const { type, offsetX, offsetY } = e
+    let n
+    for (let i = 0; i < nodes.length; i++) {
+      n = nodes[i]
+      if (ctx.isPointInPath(n._path, offsetX, offsetY)) {
+        if (eventTypeToPropName[type] in n.props) {
+          n.props[eventTypeToPropName[type]](e)
+          break
+        }
+      }
+    }
+  }
+
+  ctx.canvas.addEventListener('click', mouseEventHandler)
+  ctx.canvas.addEventListener('dblclick', mouseEventHandler)
+  ctx.canvas.addEventListener('mouseup', mouseEventHandler)
+  ctx.canvas.addEventListener('mousedown', mouseEventHandler)
+  ctx.canvas.addEventListener('mousemove', mouseEventHandler)
+
+  // for now just take the first touch from the touches list
+  function touchEventHandler(e: TouchEvent) {
+    const { touches } = e
+    const touch = touches[0]
+
+    const { type } = e
+    let n
+
+    if (e.type === 'touchend' || e.type === 'touchcancel') {
+      for (let i = 0; i < nodes.length; i++) {
+        n = nodes[i]
+        if (eventTypeToPropName[type] in n.props) {
+          n.props[eventTypeToPropName[type]](e)
+        }
+      }
+    }
+
+    if (!touch) return
+
+    const { clientX, clientY } = touch
+
+    const x = clientX - canvasClientRect.x
+    const y = clientY - canvasClientRect.y
+
+    for (let i = 0; i < nodes.length; i++) {
+      n = nodes[i]
+      if (ctx.isPointInPath(n._path, x, y)) {
+        if (eventTypeToPropName[type] in n.props) {
+          n.props[eventTypeToPropName[type]](e)
+          break
+        }
+      }
+    }
+  }
+
+  ctx.canvas.addEventListener('touchstart', touchEventHandler)
+  ctx.canvas.addEventListener('touchend', touchEventHandler)
+  ctx.canvas.addEventListener('touchcancel', touchEventHandler)
+  ctx.canvas.addEventListener('touchmove', touchEventHandler)
+}
+
 let currentVNode
+let init = false
 
 export function render(canvasCtx, vnode) {
   ctx = canvasCtx
+
   if (!canvasClientRect) canvasClientRect = ctx.canvas.getBoundingClientRect()
   nodes = []
   currentVNode = update(vnode, currentVNode || {})
   draw(ctx, currentVNode)
   nodes.reverse()
+  if (!init) {
+    init = true
+    setupListeners()
+  }
 }
