@@ -1,6 +1,6 @@
 import createElement from './create-element'
 import update from './update'
-import { mat2d, vec2 } from 'gl-matrix'
+import { vec2, mat2d } from './matrix'
 import { deg2rad } from './utils'
 
 describe('update element', () => {

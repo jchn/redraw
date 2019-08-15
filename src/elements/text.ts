@@ -1,5 +1,5 @@
 import withApplyStylesToCtx from './withApplyStylesToCtx'
-import { vec2 } from 'gl-matrix'
+import { vec2 } from '../matrix'
 
 interface props {
   x: number

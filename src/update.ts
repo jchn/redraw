@@ -1,8 +1,8 @@
 import { deg2rad } from './utils'
 import { renderComponent } from './hooks'
 import draw from './draw'
-import { mat2d, vec2 } from 'gl-matrix'
 import { rectangle, image, circle, text } from './elements'
+import { vec2, mat2d } from './matrix'
 
 const elementTypes = {
   rectangle,
