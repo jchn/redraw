@@ -1,4 +1,4 @@
-import { deg2rad } from './utils'
+import { deg2rad, shallowDiffers } from './utils'
 import { renderComponent } from './hooks'
 import draw from './draw'
 import { rectangle, image, circle, text } from './elements'
@@ -20,9 +20,12 @@ function Component(props) {
 }
 
 Component.prototype.update = function(all) {
-  window.requestAnimationFrame(() =>
-    render(ctx, Object.assign({}, currentVNode))
-  )
+  const newVNode = Object.assign({}, this._vnode)
+  Object.assign(this._vnode, update(newVNode, this._vnode))
+
+  // redraw entire canvas for now, should only be this._vnode in the future
+  draw(ctx, currentVNode)
+  // draw(ctx, this._vnode)
   // if (all) {
   //   console.log('update entrire canvas for', this)
   // } else {
@@ -35,11 +38,11 @@ function doRender(props) {
   return this.constructor(props)
 }
 
-function getLastKnowMatrix(vnode) {
+function getLastKnownMatrix(vnode) {
   if (vnode._parent && vnode._parent._matrix) {
     return vnode._parent._matrix
   } else if (vnode._parent) {
-    return getLastKnowMatrix(vnode._parent)
+    return getLastKnownMatrix(vnode._parent)
   } else {
     return mat2d.create()
   }
@@ -59,6 +62,7 @@ function update(newVNode, oldVNode) {
       newVNode._component = c = new Component(newProps)
       c.constructor = newType
       c.render = doRender
+      c._vnode = newVNode
     }
 
     renderComponent(c)
@@ -66,7 +70,7 @@ function update(newVNode, oldVNode) {
 
     newVNode._children = toChildArray(tmp) // probably have to do some sanitizing on this value
   } else {
-    const parentMatrix = getLastKnowMatrix(newVNode)
+    const parentMatrix = getLastKnownMatrix(newVNode)
     newVNode._dimensions = { width: newProps.width, height: newProps.height }
 
     if (!newVNode._matrix) {
@@ -88,12 +92,49 @@ function update(newVNode, oldVNode) {
     // [0, 0] sets anchor to top-left, [1, 1] sets anchor to bottom-right
     if (newProps.anchor) elementTypes[newType].setAnchor(newVNode)
 
-    nodes.push(newVNode)
+    if (oldVNode && oldVNode._path) newVNode._path = oldVNode._path
+
+    // nodes.push(newVNode)
     newVNode._children = toChildArray(newVNode.props.children)
   }
   updateChildren(newVNode, oldVNode)
 
   return newVNode
+}
+
+let count = 0
+
+function mountVNode(vnode) {
+  // console.log(count++)
+  if (vnode.type in elementTypes)
+    vnode._path = elementTypes[vnode.type].createPath(vnode)
+  nodes.push(vnode)
+}
+
+function unmountVNode(vnode) {
+  let idx = nodes.indexOf(vnode)
+  if (idx !== -1) {
+    nodes.splice(idx, 1)
+  } else {
+    console.warn('cannot remove', vnode)
+  }
+
+  if (vnode._children && vnode._children.length) {
+    for (let i = 0; i < vnode._children.length; i++) {
+      unmountVNode(vnode._children[i])
+    }
+  }
+}
+
+function vnodeUpdated(newVNode, oldVNode) {
+  let idx = nodes.indexOf(oldVNode)
+  if (idx !== -1) {
+    nodes.splice(idx, 1)
+  } else {
+    console.warn('could not remove', newVNode)
+  }
+
+  nodes.push(newVNode)
 }
 
 function updateChildren(newParentVNode, oldParentVNode) {
@@ -108,17 +149,36 @@ function updateChildren(newParentVNode, oldParentVNode) {
     newChildren = newParentVNode._children = [newChildren.join(' ')]
   }
 
-  for (let i = 0; i < newChildren.length; i++) {
+  let i
+  for (i = 0; i < newChildren.length; i++) {
     newChild = newChildren[i]
     oldChild = oldChildren[i]
 
     if (newChild === null || typeof newChild === 'string') continue
+
+    if (oldChild && shallowDiffers(newChild.props, oldChild.props)) {
+      vnodeUpdated(newChild, oldChild)
+    }
 
     newChild._parent = newParentVNode
     newChild._depth = newParentVNode._depth + 1
 
     update(newChild, oldChild)
   }
+
+  if (i < oldChildren.length) {
+    for (let j = i; j < oldChildren.length; j++) {
+      unmountVNode(oldChildren[j])
+    }
+  }
+
+  if (i > oldChildren.length) {
+    for (let j = oldChildren.length; j < i; j++) {
+      mountVNode(newChildren[j])
+    }
+  }
+
+  // if props changed, the component should be updated in nodes
 }
 
 let canvasClientRect
@@ -145,13 +205,15 @@ const flatten = arr => {
   }
 }
 
+const isNotNull = arg => arg !== null
+
 function toChildArray(vnode: {} | []) {
   if (!vnode) return []
 
   if (!Array.isArray(vnode)) {
-    return [vnode]
+    return [vnode].filter(isNotNull)
   } else {
-    return flatten(vnode)
+    return flatten(vnode).filter(isNotNull)
   }
 }
 
@@ -178,7 +240,7 @@ const setupListeners = () => {
     let n
     for (let i = 0; i < nodes.length; i++) {
       n = nodes[i]
-      if (ctx.isPointInPath(n._path, offsetX, offsetY)) {
+      if (n._path && ctx.isPointInPath(n._path, offsetX, offsetY)) {
         if (eventTypeToPropName[type] in n.props) {
           n.props[eventTypeToPropName[type]](e)
           break
@@ -241,10 +303,8 @@ export function render(canvasCtx, vnode) {
   ctx = canvasCtx
 
   if (!canvasClientRect) canvasClientRect = ctx.canvas.getBoundingClientRect()
-  nodes = []
   currentVNode = update(vnode, currentVNode || {})
   draw(ctx, currentVNode)
-  nodes.reverse()
   if (!init) {
     init = true
     setupListeners()
