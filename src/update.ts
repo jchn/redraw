@@ -281,7 +281,7 @@ const setupListeners = () => {
 
     for (let i = 0; i < nodes.length; i++) {
       n = nodes[i]
-      if (ctx.isPointInPath(n._path, x, y)) {
+      if (n._path && ctx.isPointInPath(n._path, x, y)) {
         if (eventTypeToPropName[type] in n.props) {
           n.props[eventTypeToPropName[type]](e)
           break
