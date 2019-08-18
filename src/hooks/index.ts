@@ -1,1 +1,1 @@
-export { renderComponent, useState } from './hooks'
+export { renderComponent, unmount, useState, useEffect } from './hooks'
