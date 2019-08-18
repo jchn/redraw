@@ -1,3 +1,3 @@
 export { render } from './update'
-export { useState } from './hooks'
+export { useState, useEffect } from './hooks'
 export { default as createElement } from './create-element'

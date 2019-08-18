@@ -1,5 +1,5 @@
 import { deg2rad, shallowDiffers } from './utils'
-import { renderComponent } from './hooks'
+import { renderComponent, unmount } from './hooks'
 import draw from './draw'
 import { rectangle, image, circle, text } from './elements'
 import { vec2, mat2d } from './matrix'
@@ -118,6 +118,8 @@ function unmountVNode(vnode) {
   } else {
     console.warn('cannot remove', vnode)
   }
+
+  unmount(vnode)
 
   if (vnode._children && vnode._children.length) {
     for (let i = 0; i < vnode._children.length; i++) {
