@@ -102,10 +102,7 @@ function update(newVNode, oldVNode) {
   return newVNode
 }
 
-let count = 0
-
 function mountVNode(vnode) {
-  // console.log(count++)
   if (vnode.type in elementTypes)
     vnode._path = elementTypes[vnode.type].createPath(vnode)
   nodes.push(vnode)
