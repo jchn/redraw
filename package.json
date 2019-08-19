@@ -1,6 +1,6 @@
 {
   "name": "@jchn/redraw",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "canvas + jsx + hooks",
   "files": [
     "build/*",
@@ -11,7 +11,7 @@
   "module": "build/index.mjs",
   "unpkg": "build/index.umd.js",
   "scripts": {
-    "build": "microbundle",
+    "build": "microbundle --external none",
     "dev": "microbundle watch",
     "test": "jest"
   },
